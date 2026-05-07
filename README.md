@@ -1,50 +1,77 @@
-# Welcome to your Expo app 👋
+# React Native Clean Initial
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Starter minimalista de **React Native** con **Expo** + **Expo Router** + **TypeScript**.
 
-## Get started
+Creado para usar como base en proyectos de aplicaciones móviles. Incluye navegación por tabs, estructura de carpetas ordenada y configuración lista para desarrollar.
 
-1. Install dependencies
+## Requisitos
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+- Node.js 18+
+- yarn (v1.22.4) — habilitar con Corepack:
 
 ```bash
-npm run reset-project
+corepack enable
+corepack prepare yarn@1.22.4 --activate
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Clonar (sin historial git)
 
-## Learn more
+```bash
+npx degit borisbelmar/react-native-clean-initial mi-app
+cd mi-app
+yarn install
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+> `degit` descarga el proyecto sin la carpeta `.git`, ideal para empezar desde cero sin historial.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Iniciar la app
 
-## Join the community
+```bash
+yarn start
+```
 
-Join our community of developers creating universal apps.
+Esto abre el menú de Expo. Desde ahí podés abrir la app en:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- **Expo Go** — escaneando el QR con tu celular
+- **Emulador Android** — presionando `a`
+- **Simulador iOS** — presionando `i` (solo macOS)
+- **Web** — presionando `w`
+
+### Comandos directos
+
+```bash
+yarn android    # Abrir directamente en emulador Android
+yarn ios        # Abrir directamente en simulador iOS
+yarn web        # Abrir directamente en el navegador
+```
+
+## Estructura del proyecto
+
+```
+app/                  # Pantallas y navegación (file-based routing)
+  _layout.tsx         # Layout raíz
+  (tabs)/             # Grupo de rutas con tabs
+    _layout.tsx       # Configuración de los tabs
+    index.tsx         # Pantalla de inicio
+    explore.tsx       # Pantalla explorar
+assets/               # Imágenes, fuentes y otros recursos
+components/           # Componentes reutilizables
+constants/            # Constantes y configuración
+```
+
+## Tecnologías incluidas
+
+| Paquete                       | Versión |
+| ----------------------------- | ------- |
+| expo                          | ~54.0   |
+| expo-router                   | ~6.0    |
+| react-native                  | 0.81    |
+| react                         | 19.1    |
+| typescript                    | ~5.9    |
+| @react-navigation/bottom-tabs | ^7.4    |
+
+## Recursos útiles
+
+- [Documentación de Expo](https://docs.expo.dev/)
+- [Documentación de Expo Router](https://docs.expo.dev/router/introduction/)
+- [Documentación de React Native](https://reactnative.dev/)
