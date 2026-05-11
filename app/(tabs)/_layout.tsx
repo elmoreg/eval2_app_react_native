@@ -17,21 +17,34 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "Transacciones",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="house.fill" color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="balance"
         options={{
-          title: "Explore",
+          title: "Balance",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <IconSymbol size={28} name="chart.bar.fill" color={color} />
           ),
         }}
       />
+      <Tabs.Screen
+        name="categories"
+        options={{
+          title: "Categorías",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="list.bullet" color={color} />
+          ),
+        }}
+      />
+      {/* Hidden routes */}
+      <Tabs.Screen name="explore" options={{ href: null }} />
+      <Tabs.Screen name="transaction/[id]" options={{ href: null }} />
+      <Tabs.Screen name="category/[id]" options={{ href: null }} />
     </Tabs>
   );
 }
