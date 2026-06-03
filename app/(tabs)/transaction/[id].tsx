@@ -9,11 +9,14 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Controller } from 'react-hook-form';
 import { useTransactions } from '../../../hooks/useTransactions';
 import { useCategories } from '../../../hooks/useCategories';
 import { useTransactionForm, TransactionFormData } from '../../../hooks/useTransactionForm';
+import { useImagePicker } from '../../../hooks/useImagePicker';
+import { useLocation } from '../../../hooks/useLocation';
 import { colors } from '../../../constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
@@ -27,8 +30,10 @@ export default function TransactionFormScreen() {
   const isEditing = id !== 'new';
   const transactionToEdit = isEditing ? transactions.find((t) => t.id === id) : null;
 
-  const { control, handleSubmit, errors, reset, setValue, watch } = useTransactionForm();
-  const currentType = watch('type');
+  const { control, handleSubmit, errors, reset, setValue } = useTransactionForm();
+  
+  const { takePhoto: takePhotoHook, pickFromGallery: pickFromGalleryHook, error: imageError } = useImagePicker();
+  const { getLocation: getLocationHook, error: locationError } = useLocation();
 
   useEffect(() => {
     if (transactionToEdit) {
@@ -37,9 +42,22 @@ export default function TransactionFormScreen() {
         type: transactionToEdit.type,
         description: transactionToEdit.description,
         categoryId: transactionToEdit.categoryId,
+        photoUri: transactionToEdit.photoUri,
+        location: transactionToEdit.location,
+      });
+    } else {
+      reset({
+        amount: 0,
+        type: 'expense',
+        description: '',
+        categoryId: '',
+        photoUri: undefined,
+        location: undefined,
       });
     }
   }, [transactionToEdit, reset]);
+
+  // Las funciones de hardware se manejan directamente en los Controllers ahora
 
   const onSubmit = async (data: TransactionFormData) => {
     if (isEditing && id) {
@@ -72,30 +90,36 @@ export default function TransactionFormScreen() {
 
       <ScrollView contentContainerStyle={styles.form}>
         <Text style={styles.label}>Tipo de movimiento</Text>
-        <View style={styles.typeSelector}>
-          <TouchableOpacity
-            style={[
-              styles.typeButton,
-              currentType === 'expense' && styles.typeButtonExpense,
-            ]}
-            onPress={() => setValue('type', 'expense')}
-          >
-            <Text style={[styles.typeButtonText, currentType === 'expense' && styles.typeButtonTextActive]}>
-              Egreso
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.typeButton,
-              currentType === 'income' && styles.typeButtonIncome,
-            ]}
-            onPress={() => setValue('type', 'income')}
-          >
-            <Text style={[styles.typeButtonText, currentType === 'income' && styles.typeButtonTextActive]}>
-              Ingreso
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <Controller
+          control={control}
+          name="type"
+          render={({ field: { onChange, value } }) => (
+            <View style={styles.typeSelector}>
+              <TouchableOpacity
+                style={[
+                  styles.typeButton,
+                  value === 'expense' && styles.typeButtonExpense,
+                ]}
+                onPress={() => onChange('expense')}
+              >
+                <Text style={[styles.typeButtonText, value === 'expense' && styles.typeButtonTextActive]}>
+                  Egreso
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.typeButton,
+                  value === 'income' && styles.typeButtonIncome,
+                ]}
+                onPress={() => onChange('income')}
+              >
+                <Text style={[styles.typeButtonText, value === 'income' && styles.typeButtonTextActive]}>
+                  Ingreso
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
 
         <Text style={styles.label}>Monto</Text>
         <Controller
@@ -131,31 +155,103 @@ export default function TransactionFormScreen() {
         {errors.description && <Text style={styles.errorText}>{errors.description.message}</Text>}
 
         <Text style={styles.label}>Categoría</Text>
-        <View style={styles.categoriesGrid}>
-          {categories.map((cat) => (
-            <TouchableOpacity
-              key={cat.id}
-              style={[
-                styles.categoryChip,
-                watch('categoryId') === cat.id && styles.categoryChipActive,
-              ]}
-              onPress={() => setValue('categoryId', cat.id)}
-            >
-              <Text style={[
-                styles.categoryChipText,
-                watch('categoryId') === cat.id && styles.categoryChipTextActive
-              ]}>
-                {cat.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-          {categories.length === 0 && (
-            <Text style={styles.noCategories}>
-              No hay categorías. Crea una primero en la pestaña de Categorías.
-            </Text>
+        <Controller
+          control={control}
+          name="categoryId"
+          render={({ field: { onChange, value } }) => (
+            <View style={styles.categoriesGrid}>
+              {categories.map((cat) => (
+                <TouchableOpacity
+                  key={cat.id}
+                  style={[
+                    styles.categoryChip,
+                    value === cat.id && styles.categoryChipActive,
+                  ]}
+                  onPress={() => onChange(cat.id)}
+                >
+                  <Text style={[
+                    styles.categoryChipText,
+                    value === cat.id && styles.categoryChipTextActive
+                  ]}>
+                    {cat.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+              {categories.length === 0 && (
+                <Text style={styles.noCategories}>
+                  No hay categorías. Crea una primero en la pestaña de Categorías.
+                </Text>
+              )}
+            </View>
           )}
-        </View>
+        />
         {errors.categoryId && <Text style={styles.errorText}>{errors.categoryId.message}</Text>}
+
+        <Text style={styles.label}>Comprobante (opcional)</Text>
+        <Controller
+          control={control}
+          name="photoUri"
+          render={({ field: { onChange, value } }) => (
+            <>
+              {value && (
+                <Image 
+                  source={{ uri: value }} 
+                  style={styles.photoPreview} 
+                  contentFit="cover" 
+                />
+              )}
+              {imageError && <Text style={styles.hardwareError}>{imageError}</Text>}
+              <View style={styles.actionRow}>
+                <TouchableOpacity 
+                  style={[styles.actionButton, styles.flexButton]} 
+                  onPress={async () => {
+                    const uri = await takePhotoHook();
+                    if (uri) onChange(uri);
+                  }}
+                >
+                  <IconSymbol name="camera" size={20} color="#fff" />
+                  <Text style={styles.actionButtonText}>Tomar Foto</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.actionButton, styles.flexButton]} 
+                  onPress={async () => {
+                    const uri = await pickFromGalleryHook();
+                    if (uri) onChange(uri);
+                  }}
+                >
+                  <IconSymbol name="photo" size={20} color="#fff" />
+                  <Text style={styles.actionButtonText}>Galería</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        />
+
+        <Text style={styles.label}>Ubicación (opcional)</Text>
+        <Controller
+          control={control}
+          name="location"
+          render={({ field: { onChange, value } }) => (
+            <>
+              {value && (
+                <Text style={styles.locationText}>
+                  Lat: {value.latitude.toFixed(4)}, Lon: {value.longitude.toFixed(4)}
+                </Text>
+              )}
+              {locationError && <Text style={styles.hardwareError}>{locationError}</Text>}
+              <TouchableOpacity 
+                style={styles.actionButton} 
+                onPress={async () => {
+                  const coords = await getLocationHook();
+                  if (coords) onChange(coords);
+                }}
+              >
+                <IconSymbol name="location.fill" size={20} color="#fff" />
+                <Text style={styles.actionButtonText}>Registrar Ubicación</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        />
 
         <TouchableOpacity
           style={styles.saveButton}
@@ -297,5 +393,45 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 10,
+  },
+  flexButton: {
+    flex: 1,
+    marginTop: 0,
+  },
+  actionButton: {
+    backgroundColor: colors.tint,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    gap: 8,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  photoPreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  locationText: {
+    color: colors.text,
+    fontStyle: 'italic',
+    marginTop: 5,
+  },
+  hardwareError: {
+    color: colors.danger,
+    fontSize: 14,
+    marginTop: 5,
+    fontStyle: 'italic',
   },
 });

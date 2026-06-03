@@ -12,6 +12,12 @@ export interface Transaction {
   description: string;
   date: string; // ISO format
   categoryId: string;
+  // ── Nuevo en Evaluación 3 ──────────────────────────────
+  photoUri?: string; // URI local de la foto del comprobante
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 export interface TransactionWithCategory extends Transaction {

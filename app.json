@@ -38,6 +38,19 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "La app necesita acceso a tu galería para adjuntar comprobantes.",
+          "cameraPermission": "La app necesita acceso a tu cámara para fotografiar comprobantes."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "La app necesita acceso a tu ubicación para registrar el lugar de la transacción."
+        }
       ]
     ],
     "experiments": {

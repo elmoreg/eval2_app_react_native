@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { Transaction, TransactionWithCategory, Category } from '../types';
 import { storage } from '../lib/storage';
 
@@ -74,9 +75,11 @@ export function useTransactions() {
 
   const balance = totals.income - totals.expense;
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   return {
     transactions: transactionsWithCategory,
