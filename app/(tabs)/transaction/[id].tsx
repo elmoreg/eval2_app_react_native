@@ -57,8 +57,7 @@ export default function TransactionFormScreen() {
     }
   }, [transactionToEdit, reset]);
 
-  // Las funciones de hardware se manejan directamente en los Controllers ahora
-
+  
   const onSubmit = async (data: TransactionFormData) => {
     if (isEditing && id) {
       await updateTransaction(id, data);
@@ -93,14 +92,14 @@ export default function TransactionFormScreen() {
         <Controller
           control={control}
           name="type"
-          render={({ field: { onChange, value } }) => (
+          render={({ field: { value } }) => (
             <View style={styles.typeSelector}>
               <TouchableOpacity
                 style={[
                   styles.typeButton,
                   value === 'expense' && styles.typeButtonExpense,
                 ]}
-                onPress={() => onChange('expense')}
+                onPress={() => setValue('type', 'expense', { shouldValidate: true, shouldDirty: true })}
               >
                 <Text style={[styles.typeButtonText, value === 'expense' && styles.typeButtonTextActive]}>
                   Egreso
@@ -111,7 +110,7 @@ export default function TransactionFormScreen() {
                   styles.typeButton,
                   value === 'income' && styles.typeButtonIncome,
                 ]}
-                onPress={() => onChange('income')}
+                onPress={() => setValue('type', 'income', { shouldValidate: true, shouldDirty: true })}
               >
                 <Text style={[styles.typeButtonText, value === 'income' && styles.typeButtonTextActive]}>
                   Ingreso
@@ -158,7 +157,7 @@ export default function TransactionFormScreen() {
         <Controller
           control={control}
           name="categoryId"
-          render={({ field: { onChange, value } }) => (
+          render={({ field: { value } }) => (
             <View style={styles.categoriesGrid}>
               {categories.map((cat) => (
                 <TouchableOpacity
@@ -167,7 +166,7 @@ export default function TransactionFormScreen() {
                     styles.categoryChip,
                     value === cat.id && styles.categoryChipActive,
                   ]}
-                  onPress={() => onChange(cat.id)}
+                  onPress={() => setValue('categoryId', cat.id, { shouldValidate: true, shouldDirty: true })}
                 >
                   <Text style={[
                     styles.categoryChipText,

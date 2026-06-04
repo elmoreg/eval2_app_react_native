@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { Category } from '../types';
 import { storage } from '../lib/storage';
 
@@ -40,9 +41,11 @@ export function useCategories() {
     setCategories(updated);
   };
 
-  useEffect(() => {
-    loadCategories();
-  }, [loadCategories]);
+  useFocusEffect(
+    useCallback(() => {
+      loadCategories();
+    }, [loadCategories])
+  );
 
   return {
     categories,
