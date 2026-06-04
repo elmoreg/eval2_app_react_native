@@ -36,7 +36,7 @@ export default function TransactionFormScreen() {
   const { getLocation: getLocationHook, error: locationError } = useLocation();
 
   useEffect(() => {
-    if (transactionToEdit) {
+    if (isEditing && transactionToEdit) {
       reset({
         amount: transactionToEdit.amount,
         type: transactionToEdit.type,
@@ -45,17 +45,8 @@ export default function TransactionFormScreen() {
         photoUri: transactionToEdit.photoUri,
         location: transactionToEdit.location,
       });
-    } else {
-      reset({
-        amount: 0,
-        type: 'expense',
-        description: '',
-        categoryId: '',
-        photoUri: undefined,
-        location: undefined,
-      });
     }
-  }, [transactionToEdit, reset]);
+  }, [transactionToEdit, reset, isEditing]);
 
   
   const onSubmit = async (data: TransactionFormData) => {
@@ -129,7 +120,7 @@ export default function TransactionFormScreen() {
               style={[styles.input, errors.amount && styles.inputError]}
               onBlur={onBlur}
               onChangeText={onChange}
-              value={value?.toString()}
+              value={value !== undefined ? value.toString() : ''}
               placeholder="0.00"
               keyboardType="numeric"
             />
@@ -146,7 +137,7 @@ export default function TransactionFormScreen() {
               style={[styles.input, errors.description && styles.inputError]}
               onBlur={onBlur}
               onChangeText={onChange}
-              value={value}
+              value={value !== undefined ? value : ''}
               placeholder="¿En qué se gastó o de dónde vino?"
             />
           )}
