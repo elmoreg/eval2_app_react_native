@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { Controller } from 'react-hook-form';
 import { useTransactions } from '../../../hooks/useTransactions';
 import { useCategories } from '../../../hooks/useCategories';
@@ -35,6 +35,25 @@ export default function TransactionFormScreen() {
   const { takePhoto: takePhotoHook, pickFromGallery: pickFromGalleryHook, error: imageError } = useImagePicker();
   const { getLocation: getLocationHook, error: locationError } = useLocation();
 
+  // Al enfocar en modo "nueva transacción", limpiar el form.
+  // reset es estable (no cambia entre renders), por eso no va en deps.
+  useFocusEffect(
+    useCallback(() => {
+      if (!isEditing) {
+        reset({
+          amount: 0,
+          type: 'expense',
+          description: '',
+          categoryId: '',
+          photoUri: undefined,
+          location: undefined,
+        });
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEditing])
+  );
+
+  // Al editar, poblar el form cuando llegan los datos de la transacción.
   useEffect(() => {
     if (isEditing && transactionToEdit) {
       reset({
@@ -46,14 +65,20 @@ export default function TransactionFormScreen() {
         location: transactionToEdit.location,
       });
     }
-  }, [transactionToEdit, reset, isEditing]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transactionToEdit]);
 
   
   const onSubmit = async (data: TransactionFormData) => {
+    const formattedData = {
+      ...data,
+      amount: Number(data.amount),
+    };
+    
     if (isEditing && id) {
-      await updateTransaction(id, data);
+      await updateTransaction(id, formattedData);
     } else {
-      await addTransaction(data);
+      await addTransaction(formattedData);
     }
     router.back();
   };

@@ -4,7 +4,10 @@ import * as z from 'zod';
 import { TransactionType } from '../types';
 
 const transactionSchema = z.object({
-  amount: z.coerce.number().positive('El monto debe ser un número positivo'),
+  amount: z.union([z.string(), z.number()]).refine((val) => {
+    const num = Number(val);
+    return !isNaN(num) && num > 0;
+  }, 'El monto debe ser un número positivo'),
   type: z.enum(['income', 'expense'] as const),
   description: z.string().min(3, 'La descripción debe tener al menos 3 caracteres'),
   categoryId: z.string().min(1, 'Debes seleccionar una categoría'),
