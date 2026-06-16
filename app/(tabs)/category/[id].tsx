@@ -21,7 +21,7 @@ export default function CategoryFormScreen() {
   const { categories, addCategory, updateCategory, isLoading } = useCategories();
   
   const isEditing = id !== 'new';
-  const categoryToEdit = isEditing ? categories.find((c) => c.id === id) : null;
+  const categoryToEdit = isEditing ? categories.find((c) => c.id === Number(id)) : null;
 
   const { control, handleSubmit, errors, reset } = useCategoryForm();
 
@@ -33,7 +33,7 @@ export default function CategoryFormScreen() {
 
   const onSubmit = async (data: { name: string }) => {
     if (isEditing && id) {
-      await updateCategory(id, data.name);
+      await updateCategory(Number(id), data.name);
     } else {
       await addCategory(data.name);
     }

@@ -6,7 +6,7 @@ const TOKEN_KEY = 'cashi_jwt_token';
 // iOS Simulator: http://localhost:3000
 // Android Emulator: http://10.0.2.2:3000
 // Dispositivo físico en la misma red: http://192.168.X.X:3000
-export const API_BASE_URL = 'http://localhost:3000';
+export const API_BASE_URL = 'https://eva2-api-cashi.onrender.com';
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
 
@@ -141,6 +141,23 @@ export const api = {
   categories: {
     list: (token: string) =>
       apiFetch<any[]>('/categories', { token }),
+
+    create: (name: string, token: string) =>
+      apiFetch<any>('/categories', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+        token,
+      }),
+
+    update: (id: number, name: string, token: string) =>
+      apiFetch<any>(`/categories/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ name }),
+        token,
+      }),
+
+    delete: (id: number, token: string) =>
+      apiFetch<any>(`/categories/${id}`, { method: 'DELETE', token }),
   },
 };
 

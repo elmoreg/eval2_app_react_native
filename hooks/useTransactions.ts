@@ -14,7 +14,13 @@ export function useTransactions() {
   const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
-    if (!token) return;
+    if (!token) {
+      setTransactions([]);
+      setTransactionsWithCategory([]);
+      setTotals({ income: 0, expense: 0 });
+      setBalance(0);
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {

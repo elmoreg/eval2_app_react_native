@@ -28,6 +28,24 @@ export function useCategories() {
     }
   }, [token]);
 
+  const addCategory = async (name: string) => {
+    if (!token) return;
+    await api.categories.create(name, token);
+    await loadCategories();
+  };
+
+  const deleteCategory = async (id: number) => {
+    if (!token) return;
+    await api.categories.delete(id, token);
+    await loadCategories();
+  };
+
+  const updateCategory = async (id: number, name: string) => {
+    if (!token) return;
+    await api.categories.update(id, name, token);
+    await loadCategories();
+  };
+
   useFocusEffect(
     useCallback(() => {
       loadCategories();
@@ -39,5 +57,8 @@ export function useCategories() {
     isLoading,
     error,
     refreshCategories: loadCategories,
+    addCategory,
+    deleteCategory,
+    updateCategory,
   };
 }

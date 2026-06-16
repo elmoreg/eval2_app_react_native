@@ -21,14 +21,7 @@ yarn install
 Editar el archivo `services/api.ts` y cambiar `API_BASE_URL` a la URL del servidor:
 
 ```ts
-// iOS Simulator (mismo Mac)
-export const API_BASE_URL = 'http://localhost:3000';
-
-// Android Emulator
-export const API_BASE_URL = 'http://10.0.2.2:3000';
-
-// Dispositivo físico en la misma red WiFi
-export const API_BASE_URL = 'http://192.168.X.X:3000';
+export const API_BASE_URL = 'https://eva2-api-cashi.onrender.com';
 ```
 
 ### Iniciar la app

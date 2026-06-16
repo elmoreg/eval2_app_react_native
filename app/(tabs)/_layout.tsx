@@ -1,11 +1,11 @@
 import { Tabs } from "expo-router";
 import React from "react";
-
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { colors } from "@/constants/theme";
 
 export default function TabLayout() {
+  // Sin lógica de auth aquí: AuthContext maneja toda la navegación
   return (
     <Tabs
       screenOptions={{

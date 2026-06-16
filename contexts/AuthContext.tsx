@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import { api, saveToken, getToken, deleteToken } from '../services/api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -25,7 +25,6 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const router = useRouter();
   const [state, setState] = useState<AuthState>({
     token: null,
     email: null,
@@ -40,7 +39,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const stored = await getToken();
         if (stored) {
-          // Decodificar el email del payload sin verificar firma (solo lectura)
           const payload = JSON.parse(atob(stored.split('.')[1]));
           setState({
             token: stored,
@@ -49,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isLoading: false,
             error: null,
           });
+          // /index se encarga de redirigir cuando isAuthenticated cambia
         } else {
           setState((s) => ({ ...s, isLoading: false }));
         }
@@ -63,13 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { token } = await api.auth.login(email, password);
       await saveToken(token);
-      setState({
-        token,
-        email,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      });
+      setState({ token, email, isAuthenticated: true, isLoading: false, error: null });
+      // Navegar a tabs — /login no existe dentro de (tabs) así que no hay ambigüedad
       router.replace('/(tabs)');
       return true;
     } catch (err: any) {
@@ -83,13 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { token } = await api.auth.register(email, password);
       await saveToken(token);
-      setState({
-        token,
-        email,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      });
+      setState({ token, email, isAuthenticated: true, isLoading: false, error: null });
       router.replace('/(tabs)');
       return true;
     } catch (err: any) {
@@ -100,14 +88,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async (): Promise<void> => {
     await deleteToken();
-    setState({
-      token: null,
-      email: null,
-      isAuthenticated: false,
-      isLoading: false,
-      error: null,
-    });
-    router.replace('/');
+    setState({ token: null, email: null, isAuthenticated: false, isLoading: false, error: null });
+    // /login es inequívoco — no existe dentro de (tabs) así que siempre va a app/login.tsx
+    router.replace('/login');
   };
 
   return (
