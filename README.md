@@ -1,63 +1,117 @@
-# React Native Clean Initial - Cashi App (Evaluación 3)
+# Cashi App — Evaluación Final
 
-Starter minimalista de **React Native** con **Expo** + **Expo Router** + **TypeScript**.
-
-Cashi es una aplicación de gestión de gastos e ingresos. En esta iteración (Evaluación 3) se agregaron capacidades de hardware: adjuntar comprobantes fotográficos y registrar ubicación GPS.
+Aplicación React Native con Expo para gestión de finanzas personales.  
+Conectada a un backend real con autenticación JWT.
 
 ## Instrucciones para instalar y correr la app
 
-1. Clonar el repositorio.
-2. Instalar dependencias utilizando Yarn o npm:
+### Requisitos
+
+- Node.js 18+
+- Yarn (v1.22.4)
+
+### Instalación
 
 ```bash
 yarn install
 ```
 
-3. Iniciar la aplicación usando Expo:
+### Configurar la URL de la API
+
+Editar el archivo `services/api.ts` y cambiar `API_BASE_URL` a la URL del servidor:
+
+```ts
+// iOS Simulator (mismo Mac)
+export const API_BASE_URL = 'http://localhost:3000';
+
+// Android Emulator
+export const API_BASE_URL = 'http://10.0.2.2:3000';
+
+// Dispositivo físico en la misma red WiFi
+export const API_BASE_URL = 'http://192.168.X.X:3000';
+```
+
+### Iniciar la app
 
 ```bash
 yarn start
 ```
 
-Esto abre el menú de Expo. Desde ahí podés abrir la app en:
-- **Expo Go** — escaneando el QR con tu celular.
-- **Emulador Android** — presionando `a`.
-- **Simulador iOS** — presionando `i` (solo macOS).
+Luego escanear el QR con Expo Go, o presionar `a` (Android) / `i` (iOS).
 
-## Qué cambió respecto a la Evaluación 2
+### URL de la API
 
-Se extendió el modelo de datos de `Transaction` para incluir dos campos opcionales sin romper el funcionamiento anterior:
+La API corre localmente en `http://localhost:3000`. Construida con **Hono + Prisma + PostgreSQL**.
 
-```typescript
-export interface Transaction {
-  // ... campos anteriores
-  photoUri?: string; // URI local de la foto del comprobante
-  location?: {
-    latitude: number;
-    longitude: number;
-  };
-}
-```
+---
 
-**Funcionalidades agregadas:**
-- **Foto del Comprobante:** Al crear o editar una transacción, se puede tomar una foto con la cámara o seleccionarla de la galería. Se muestra una previsualización antes de guardar.
-- **Ubicación GPS:** Permite registrar la latitud y longitud actual al momento de crear la transacción.
-- **Custom Hooks:** La lógica de hardware y manejo de permisos vive de manera exclusiva en `useImagePicker.ts` y `useLocation.ts`.
-- **Manejo de Errores sin Alerts:** Si se deniegan permisos de cámara, galería o ubicación, se muestran mensajes claros directamente en la interfaz de usuario para evitar cierres o interrupciones con ventanas emergentes.
+## Qué cambió respecto a la Evaluación 3
+
+| Aspecto | Evaluación 3 | Evaluación Final |
+|---|---|---|
+| Fuente de datos | AsyncStorage | API REST con JWT |
+| Autenticación | Email/pass hardcodeado | Login/registro contra el servidor |
+| Token | No aplica | `expo-secure-store` |
+| `id` de transacción | `string` (Date.now) | `number` (Prisma Int) |
+| Foto del comprobante | URI local en AsyncStorage | URI local → subida a la API → `receiptUrl` pública |
+| Coordenadas | Objeto `{ latitude, longitude }` en AsyncStorage | Campos planos `latitude`/`longitude` en el servidor |
+| Firma de hooks | — | **Igual** — componentes sin cambios |
+| Componentes y pantallas | — | **Sin cambios** |
+
+### Nuevos archivos
+
+- `services/api.ts` — centraliza todas las llamadas HTTP
+- `contexts/AuthContext.tsx` — token JWT en estado React
+- `hooks/useAuth.ts` — thin wrapper del AuthContext
+- `app/register.tsx` — pantalla de registro
+- `app/(tabs)/profile.tsx` — perfil y logout
+
+---
 
 ## Uso de IA
 
-- **Herramientas utilizadas:** Gemini 3.1 Pro (mediante Antigravity IDE).
-- **Para qué:** Se usó la IA para asistir en la estructuración de los Custom Hooks (`useImagePicker` y `useLocation`), y para la actualización del formulario de transacción para incluir el renderizado de la imagen y coordenadas, así como los mensajes de error dinámicos.
-- **Qué aprendimos:** Aprendimos la importancia de separar la lógica de negocio y llamadas a APIs nativas en hooks reutilizables, permitiendo que los componentes de la interfaz de usuario se mantengan limpios ("dumb components" que solo consumen el estado y los métodos del hook). También aprendimos a manejar permisos de manera más amigable mediante renderizado condicional de errores en la pantalla en lugar de usar Alerts intrusivos.
+- **Herramientas utilizadas:** Gemini 3.1 Pro (mediante Antigravity IDE) y Claude Sonnet 4.6 (Thinking).
+- **Para qué:**
+  - Diseño de la arquitectura de capas (services → context → hooks → componentes).
+  - Implementación de `apiService` centralizado con manejo de errores HTTP.
+  - Migración de `useTransactions` y `useCategories` de AsyncStorage a la API REST.
+  - Integración de `expo-secure-store` para persistir el JWT.
+- **Qué aprendimos:**
+  - La importancia de la separación en capas: el componente nunca sabe de dónde viene el token, solo usa el hook. Cambiar el proveedor de datos (de AsyncStorage a API) no requirió tocar ninguna pantalla.
+  - Que `fetch` nativo es suficiente si se encapsula bien — no se necesita axios para este caso.
+  - Cómo manejar tokens JWT de forma segura en React Native con SecureStore.
+
+---
 
 ## Estructura del proyecto
 
 ```
-app/                  # Pantallas y navegación (file-based routing)
-assets/               # Imágenes, fuentes y otros recursos
-components/           # Componentes reutilizables
-constants/            # Constantes y configuración
-hooks/                # Custom hooks (incluyendo uso de hardware)
-types/                # Definiciones de TypeScript
+app/
+  _layout.tsx          # AuthProvider envuelve el árbol
+  index.tsx            # Pantalla de login
+  register.tsx         # Pantalla de registro (nueva)
+  (tabs)/
+    index.tsx          # Lista de transacciones
+    balance.tsx        # Balance del servidor
+    categories.tsx     # Categorías (solo lectura)
+    profile.tsx        # Perfil + logout (nueva)
+    transaction/
+      [id].tsx         # Crear / Editar transacción
+
+contexts/
+  AuthContext.tsx      # Token JWT + login/register/logout
+
+services/
+  api.ts              # Todas las llamadas HTTP centralizadas
+
+hooks/
+  useAuth.ts          # Thin wrapper del AuthContext
+  useTransactions.ts  # CRUD contra la API
+  useCategories.ts    # GET /categories
+  useImagePicker.ts   # Cámara y galería (sin cambios)
+  useLocation.ts      # GPS (sin cambios)
+  useTransactionForm.ts
+
+types/
+  index.ts            # Transaction.id: number, Category.id: number
 ```

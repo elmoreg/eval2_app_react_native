@@ -4,18 +4,14 @@ import {
   Text,
   View,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import { useCategories } from '../../hooks/useCategories';
 import { colors } from '../../constants/theme';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function CategoriesScreen() {
-  const { categories, isLoading, deleteCategory } = useCategories();
-  const router = useRouter();
+  const { categories, isLoading, error } = useCategories();
 
   if (isLoading) {
     return (
@@ -29,38 +25,25 @@ export default function CategoriesScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Categorías</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => router.push('/(tabs)/category/new')}
-        >
-          <IconSymbol name="plus" size={24} color="#fff" />
-        </TouchableOpacity>
       </View>
+
+      {error && (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
 
       <FlatList
         data={categories}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
           <View style={styles.item}>
             <Text style={styles.itemName}>{item.name}</Text>
-            <View style={styles.actions}>
-              <TouchableOpacity
-                onPress={() => router.push(`/(tabs)/category/${item.id}`)}
-              >
-                <IconSymbol name="pencil" size={20} color={colors.muted} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => deleteCategory(item.id)}
-                style={styles.deleteAction}
-              >
-                <IconSymbol name="trash" size={20} color={colors.danger} />
-              </TouchableOpacity>
-            </View>
           </View>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>No hay categorías creadas.</Text>
+            <Text style={styles.emptyText}>No hay categorías disponibles.</Text>
           </View>
         }
         contentContainerStyle={styles.list}
@@ -90,13 +73,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text,
   },
-  addButton: {
-    backgroundColor: colors.tint,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
+  errorBox: {
+    margin: 20,
+    padding: 15,
+    backgroundColor: '#fee2e2',
+    borderRadius: 10,
+  },
+  errorText: {
+    color: colors.danger,
+    textAlign: 'center',
   },
   list: {
     padding: 20,
@@ -115,13 +100,6 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 16,
     color: colors.text,
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  deleteAction: {
-    marginLeft: 15,
   },
   empty: {
     padding: 40,

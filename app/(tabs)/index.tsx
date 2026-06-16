@@ -39,7 +39,7 @@ export default function TransactionsScreen() {
 
       <FlatList
         data={transactions}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
           <View style={styles.item}>
             <View style={styles.itemMain}>

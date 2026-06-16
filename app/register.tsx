@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,37 +7,21 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../hooks/useAuth';
 import { colors } from '../constants/theme';
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, error, isAuthenticated, isLoading } = useAuth();
+  const { register, error } = useAuth();
   const router = useRouter();
 
-  // Si ya está autenticado, redirigir a las tabs
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.replace('/(tabs)');
-    }
-  }, [isAuthenticated, isLoading]);
-
-  const handleLogin = () => {
-    login(email, password);
+  const handleRegister = () => {
+    register(email, password);
   };
-
-  if (isLoading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={colors.tint} />
-      </View>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -47,7 +31,7 @@ export default function LoginScreen() {
       >
         <View style={styles.content}>
           <Text style={styles.logo}>Cashi</Text>
-          <Text style={styles.subtitle}>Tu billetera inteligente</Text>
+          <Text style={styles.subtitle}>Crear cuenta nueva</Text>
 
           <View style={styles.form}>
             <TextInput
@@ -68,15 +52,15 @@ export default function LoginScreen() {
 
             {error && <Text style={styles.errorText}>{error}</Text>}
 
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-              <Text style={styles.buttonText}>Iniciar Sesión</Text>
+            <TouchableOpacity style={styles.button} onPress={handleRegister}>
+              <Text style={styles.buttonText}>Registrarse</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.linkButton}
-              onPress={() => router.push('/register')}
+              onPress={() => router.back()}
             >
-              <Text style={styles.linkText}>¿No tenés cuenta? Registrarse</Text>
+              <Text style={styles.linkText}>¿Ya tenés cuenta? Iniciar sesión</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -88,12 +72,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.background,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: colors.background,
   },
   container: {

@@ -41,6 +41,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Perfil",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="person.fill" color={color} />
+          ),
+        }}
+      />
       {/* Hidden routes */}
       <Tabs.Screen name="explore" options={{ href: null }} />
       <Tabs.Screen name="transaction/[id]" options={{ href: null }} />

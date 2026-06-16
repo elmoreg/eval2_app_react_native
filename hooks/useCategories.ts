@@ -1,45 +1,32 @@
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Category } from '../types';
-import { storage } from '../lib/storage';
+import { api } from '../services/api';
+import { useAuth } from './useAuth';
 
 export function useCategories() {
+  const { token } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadCategories = useCallback(async () => {
+    if (!token) return;
     setIsLoading(true);
+    setError(null);
     try {
-      const data = await storage.getCategories();
-      setCategories(data);
-    } catch (error) {
-      console.error('Error loading categories:', error);
+      const data = await api.categories.list(token);
+      const mapped: Category[] = data.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+      }));
+      setCategories(mapped);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  }, []);
-
-  const addCategory = async (name: string) => {
-    const newCategory: Category = {
-      id: Date.now().toString(),
-      name,
-    };
-    const updated = [...categories, newCategory];
-    await storage.saveCategories(updated);
-    setCategories(updated);
-  };
-
-  const updateCategory = async (id: string, name: string) => {
-    const updated = categories.map((c) => (c.id === id ? { ...c, name } : c));
-    await storage.saveCategories(updated);
-    setCategories(updated);
-  };
-
-  const deleteCategory = async (id: string) => {
-    const updated = categories.filter((c) => c.id !== id);
-    await storage.saveCategories(updated);
-    setCategories(updated);
-  };
+  }, [token]);
 
   useFocusEffect(
     useCallback(() => {
@@ -50,9 +37,7 @@ export function useCategories() {
   return {
     categories,
     isLoading,
+    error,
     refreshCategories: loadCategories,
-    addCategory,
-    updateCategory,
-    deleteCategory,
   };
 }

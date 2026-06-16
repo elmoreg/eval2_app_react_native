@@ -51,7 +51,8 @@
         {
           "locationAlwaysAndWhenInUsePermission": "La app necesita acceso a tu ubicación para registrar el lugar de la transacción."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

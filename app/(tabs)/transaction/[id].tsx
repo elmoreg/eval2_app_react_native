@@ -28,7 +28,7 @@ export default function TransactionFormScreen() {
   const { categories, isLoading: loadingCats } = useCategories();
   
   const isEditing = id !== 'new';
-  const transactionToEdit = isEditing ? transactions.find((t) => t.id === id) : null;
+  const transactionToEdit = isEditing ? transactions.find((t) => t.id === Number(id)) : null;
 
   const { control, handleSubmit, errors, reset, setValue } = useTransactionForm();
   
@@ -44,7 +44,7 @@ export default function TransactionFormScreen() {
           amount: 0,
           type: 'expense',
           description: '',
-          categoryId: '',
+          categoryId: undefined,
           photoUri: undefined,
           location: undefined,
         });
@@ -61,8 +61,12 @@ export default function TransactionFormScreen() {
         type: transactionToEdit.type,
         description: transactionToEdit.description,
         categoryId: transactionToEdit.categoryId,
-        photoUri: transactionToEdit.photoUri,
-        location: transactionToEdit.location,
+        // Precargar la URL pública como photoUri para mostrar el preview
+        photoUri: transactionToEdit.receiptUrl,
+        location: transactionToEdit.latitude != null ? {
+          latitude: transactionToEdit.latitude,
+          longitude: transactionToEdit.longitude!,
+        } : undefined,
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -73,10 +77,11 @@ export default function TransactionFormScreen() {
     const formattedData = {
       ...data,
       amount: Number(data.amount),
+      categoryId: Number(data.categoryId),
     };
     
     if (isEditing && id) {
-      await updateTransaction(id, formattedData);
+      await updateTransaction(Number(id), formattedData);
     } else {
       await addTransaction(formattedData);
     }
